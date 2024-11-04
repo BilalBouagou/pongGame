@@ -58,29 +58,12 @@ socket.onmessage = function(event) {
 			player.x = canvas.width - paddleWidth;
 			opponent.x = 0;
 		}
-		for (const playerDataID in data.gameState.paddlePosition) {
-			const playerData = data.gameState.paddlePosition[playerDataID];
-			if (playerData.playerID === playerID) {
-				player.y = playerData.y;
-			}
-			else {
-				opponent.y = playerData.y;
-			}
-		}
-		for (const scoresPlayerID in data.gameState.scores) {
-			const scores = data.gameState.scores[scoresPlayerID];
-			if (scores.playerID === playerID) {
-				player.score = scores.score;
-			}
-			else {
-				opponent.score = scores.score;
-			}
-		}
-		ball.x = data.gameState.ballPosition.x;
-		ball.y = data.gameState.ballPosition.y;
-		gameStarted = true;
+		playersConnected = true;
 	}
 	if (data.type === 'gameStateUpdate') {
+		if (!gameStarted) {
+			gameStarted = true;
+		}
 		for (const playerDataID in data.gameState.paddlePosition) {
 			const playerData = data.gameState.paddlePosition[playerDataID];
 			if (playerData.playerID === playerID) {
@@ -102,7 +85,7 @@ socket.onmessage = function(event) {
 		ball.x = data.gameState.ballPosition.x;
 		ball.y = data.gameState.ballPosition.y;
 	}
-	if (data.type == 'paddlePositionUpdate') {
+	if (data.type === 'paddlePositionUpdate') {
 		if (data.playerID === playerID) {
 			player.y = data.y;
 		}
@@ -152,10 +135,15 @@ function draw() {
     ctx.arc(ball.x, ball.y, ball.size, 0, Math.PI * 2);
     ctx.fill();
 
-	if (playersConnected == false)
+	if (playersConnected == false) {
 		scoreboard.textContent = 'player did not connect yet.';
-	else
-		scoreboard.textContent = "players connected.";
+	}
+	else if (playersConnected && !gameStarted) {
+		scoreboard.textContent = 'players connected, game is starting soon.';
+	}
+	else {
+		scoreboard.textContent = `Your score ${player.score} Your opponent\'s score ${opponent.score}`
+	}
 }
 
 function gameLoop() {
