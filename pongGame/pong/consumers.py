@@ -29,12 +29,12 @@ class GameConsumer(AsyncWebsocketConsumer):
 				'paddlePosition': {},
 				'scores': {},
 				'ballPosition': {
-					'x': 0,
-					'y': 0
+					'x': self.SCREEN_WIDTH / 2,
+					'y': self.SCREEN_HEIGHT / 2
 				},
 				'ballDirection': {
-					'x': 0,
-					'y': 0
+					'x': random.choice([-5, 5]),
+					'y': random.choice([-5, 5])
 				}
 			}
 
@@ -103,17 +103,17 @@ class GameConsumer(AsyncWebsocketConsumer):
 				if self.gameStates[gameID]['ballPosition']['x'] < 0:
 					for playerID in self.gameStates[gameID]['paddlePosition']:
 						if self.gameStates[gameID]['paddlePosition'][playerID]['side'] == 'right':
-							self.gameStates[gameID]['scores'][playerID] += 1
+							self.gameStates[gameID]['scores'][playerID]['score'] += 1
 							break
 				elif self.gameStates[gameID]['ballPosition']['x'] > self.SCREEN_WIDTH:
 					for playerID in self.gameStates[gameID]['paddlePosition']:
 						if self.gameStates[gameID]['paddlePosition'][playerID]['side'] == 'left':
-							self.gameStates[gameID]['scores'][playerID] += 1
+							self.gameStates[gameID]['scores'][playerID]['score'] += 1
 							break
 				self.gameStates[gameID]['ballPosition']['x'] = self.SCREEN_WIDTH / 2
 				self.gameStates[gameID]['ballPosition']['y'] = self.SCREEN_HEIGHT / 2
-				self.gameStates[gameID]['ballDirection']['x'] = random.choice([-1, 1])
-				self.gameStates[gameID]['ballDirection']['y'] = random.choice([-1, 1])
+				self.gameStates[gameID]['ballDirection']['x'] = random.choice([-5, 5])
+				self.gameStates[gameID]['ballDirection']['y'] = random.choice([-5, 5])
 
 			await self.channel_layer.group_send(
 				self.room_group_name,
@@ -136,7 +136,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 		await self.send(text_data=json.dumps({
 			'type': 'paddlePositionUpdate',
 			'playerID': event['playerID'],
-			'y': event['position'],
+			'y': event['y'],
 			'side': event['side']
 		}))
 
@@ -151,7 +151,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 				position = self.gameStates[self.gameID]['paddlePosition'][self.playerID]['y'] + self.PADDLE_SPEED
 				if position > self.SCREEN_HEIGHT - self.PADDLE_HEIGHT:
 					position = self.SCREEN_HEIGHT - self.PADDLE_HEIGHT
-			self.gameStates[self.gameID]['paddlePosition'][self.playerID] = position
+			self.gameStates[self.gameID]['paddlePosition'][self.playerID]['y'] = position
 			await self.channel_layer.group_send(
 				self.room_group_name,
 				{

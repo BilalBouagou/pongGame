@@ -46,66 +46,70 @@ socket.onopen = function(event) {
 socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
 
-    if (data.status === 'GameStarting') {
-        playerID = data.playerID;
-        if (data.side === 'left') {
-            playerSide = 'left';
-            player.x = 0;
-            opponent.x = canvas.width - paddleWidth;
-        }
-        else {
-            playerSide = 'right';
-            player.x = canvas.width - paddleWidth;
-            opponent.x = 0;
-        }
-        for (const playerData of data.gameState.paddlePosition) {
-            if (playerData.playerID === playerID) {
-                player.y = playerData.y;
-            }
-            else {
-                opponent.y = playerData.y;
-            }
-        }
-        for (const scores of data.gameState.scores) {
-            if (scores.playerID === playerID) {
-                player.score = scores.score;
-            }
-            else {
-                opponent.score = scores.score;
-            }
-        }
-        ball.x = data.ballPosition.x;
-        ball.y = data.ballPosition.y;
-        gameStarted = true;
-    }
-    if (data.type === 'gameStateUpdate') {
-        for (const playerData of data.gameState.paddlePosition) {
-            if (playerData.playerID === playerID) {
-                player.y = playerData.y;
-            }
-            else {
-                opponent.y = playerData.y;
-            }
-        }
-        for (const scores of data.scores) {
-            if (scores.playerID === playerID) {
-                player.score = scores.score;
-            }
-            else {
-                opponent.score = scores.score;
-            }
-        }
-        ball.x = data.ballPosition.x;
-        ball.y = data.ballPosition.y;
-    }
-    if (data.type == paddlePositionUpdate) {
-        if (data.playerID === playerID) {
-            player.y = data.y;
-        }
-        else {
-            opponent.y = data.y;
-        }
-    }
+	if (data.status === 'GameStarting') {
+		playerID = data.playerID;
+		if (data.side === 'left') {
+			playerSide = 'left';
+			player.x = 0;
+			opponent.x = canvas.width - paddleWidth;
+		}
+		else {
+			playerSide = 'right';
+			player.x = canvas.width - paddleWidth;
+			opponent.x = 0;
+		}
+		for (const playerDataID in data.gameState.paddlePosition) {
+			const playerData = data.gameState.paddlePosition[playerDataID];
+			if (playerData.playerID === playerID) {
+				player.y = playerData.y;
+			}
+			else {
+				opponent.y = playerData.y;
+			}
+		}
+		for (const scoresPlayerID in data.gameState.scores) {
+			const scores = data.gameState.scores[scoresPlayerID];
+			if (scores.playerID === playerID) {
+				player.score = scores.score;
+			}
+			else {
+				opponent.score = scores.score;
+			}
+		}
+		ball.x = data.gameState.ballPosition.x;
+		ball.y = data.gameState.ballPosition.y;
+		gameStarted = true;
+	}
+	if (data.type === 'gameStateUpdate') {
+		for (const playerDataID in data.gameState.paddlePosition) {
+			const playerData = data.gameState.paddlePosition[playerDataID];
+			if (playerData.playerID === playerID) {
+				player.y = playerData.y;
+			}
+			else {
+				opponent.y = playerData.y;
+			}
+		}
+		for (const scoresPlayerID in data.gameState.scores) {
+			const scores = data.gameState.scores[scoresPlayerID];
+			if (scores.playerID === playerID) {
+				player.score = scores.score;
+			}
+			else {
+				opponent.score = scores.score;
+			}
+		}
+		ball.x = data.gameState.ballPosition.x;
+		ball.y = data.gameState.ballPosition.y;
+	}
+	if (data.type == 'paddlePositionUpdate') {
+		if (data.playerID === playerID) {
+			player.y = data.y;
+		}
+		else {
+			opponent.y = data.y;
+		}
+	}
 };
 
 socket.onclose = function(event) {
@@ -115,7 +119,7 @@ socket.onclose = function(event) {
 function movePaddle(direction) {
 	if (playerID != 'spectator') {
 		const moveData = {
-			action: 'paddleMove',
+			type: 'paddleMove',
 			sender: playerID,
 			direction: direction, // 'up' or 'down'
 		};
