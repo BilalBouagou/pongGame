@@ -85,7 +85,7 @@ socket.onmessage = function(event) {
 		ball.x = data.gameState.ballPosition.x;
 		ball.y = data.gameState.ballPosition.y;
 	}
-	if (data.type == 'paddlePositionUpdate') {
+	if (data.type === 'paddlePositionUpdate') {
 		if (data.playerID === playerID) {
 			player.y = data.y;
 		}

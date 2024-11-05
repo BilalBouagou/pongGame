@@ -62,8 +62,6 @@ class GameConsumer(AsyncWebsocketConsumer):
 				{
 					'type' : 'notifyPlayers',
 					'status' : 'GameStarting',
-					'side' : self.playerSide,
-					'playerID' : self.playerID,
 					'gameState' : self.gameStates[self.gameID]
 				}
 			)
@@ -76,8 +74,8 @@ class GameConsumer(AsyncWebsocketConsumer):
 		await self.send(text_data=json.dumps({
 			'type': 'notifyPlayers',
 			'status': event['status'],
-			'side': event['side'],
-			'playerID': event['playerID'],
+			'side': self.playerSide,
+			'playerID': self.playerID,
 			'gameState': event['gameState']
 		}))
 
